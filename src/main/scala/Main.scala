@@ -7,19 +7,21 @@ import com.esotericsoftware.kryo.io.Output;
 import types._
 
 object Main extends App {
-  def printBase[T](x: T) = println(x)
+  def printInt(x: Int) = println(x)
   def printAdv[T](x: Adv[T]) = println(x)
 
   val x = Adv[Int](777)
 
   // this will fail which is good
-  // printBase(x)
+  // printInt(x)
 
   // this will work
   printAdv(x)
+  println(x.getClass)
 
   // for coercing into base type
-  printBase(x.coerce[Int])
+  printInt(x.coerce[Int])
+  printInt(x.value)
 
   // for Kryo serialization
   val kryo = new Kryo()
@@ -30,8 +32,13 @@ object Main extends App {
   output.close()
 
   val input = new Input(byteArr);
-  val y = kryo.readObject(input, classOf(Adv[Int].Type))
+  val y = Adv[Int](kryo.readObject(input, classOf[AdvInt.Repr]))
   input.close()
 
-  println(y)
+  // this will fail which is good
+  // printInt(y)
+
+  // this will work
+  printAdv(y)
+  println(y.getClass)
 }
