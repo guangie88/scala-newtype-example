@@ -7,8 +7,8 @@ import com.esotericsoftware.kryo.io.Output;
 import types._
 
 object Main extends App {
-  def printInt(x: Int) = println(x)
-  def printAdv[T](x: Adv[T]) = println(x)
+  def printInt(x: Int) = println(s"${x.getClass}: $x")
+  def printAdv[T](x: Adv[T]) = println(s"${x.getClass}: $x")
 
   val x = Adv[Int](777)
 
@@ -17,7 +17,6 @@ object Main extends App {
 
   // this will work
   printAdv(x)
-  println(x.getClass)
 
   // for coercing into base type
   printInt(x.coerce[Int])
@@ -31,14 +30,21 @@ object Main extends App {
   kryo.writeObject(output, x)
   output.close()
 
-  val input = new Input(byteArr);
-  val y = Adv[Int](kryo.readObject(input, classOf[AdvInt.Repr]))
-  input.close()
+  val inputY = new Input(byteArr);
+  // weird syntax, it's Adv.Repr[Int] instead of Adv[Int].Repr
+  val y = Adv[Int](kryo.readObject(inputY, classOf[Adv.Repr[Int]]))
+  inputY.close()
 
   // this will fail which is good
   // printInt(y)
 
   // this will work
   printAdv(y)
-  println(y.getClass)
+
+  // reading into primitive works too
+  val inputZ = new Input(byteArr);
+  val z = kryo.readObject(inputZ, classOf[Int])
+  inputZ.close()
+
+  printInt(z)
 }
